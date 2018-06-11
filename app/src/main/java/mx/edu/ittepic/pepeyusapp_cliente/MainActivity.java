@@ -1,6 +1,7 @@
 package mx.edu.ittepic.pepeyusapp_cliente;
 
 import android.app.ProgressDialog;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,13 +26,17 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    static boolean flag1;
+    static boolean flag, flag1;
     static boolean flags[];
+    static int cont;
     static List<List<String>> idsProductos, idsProductos1;
     static String indicador;
     String bebidas[]={"Bebidas éxoticas", "Hidratantes", "Más bebidas", "Para refrescar", "Preparados", "Raspados"};
     String fastFood[]= {"Baguettes", "Hamburguesas", "Sandwiches", "Tortas"};
     String malteadas[]= {"Malteadas", "Malteadas de nieve", "Malteadas exóticas"};
+    String tipos[]= {"Algo especial", "Baguettes", "Bebidas exoticas", "Escamochas", "Hamburguesas", "Hidratantes",
+                     "Malteadas", "Malteadas de nieve", "Malteadas exoticas", "Mas bebidas", "Para empezar", "Para refrescar",
+                     "Postres", "Preparados", "Raspados", "Sandwiches", "Sin culpas", "Tortas"};
     static List<String> algoEspecial, baguettes, bebidasExoticas, escamochas;
     static List<String> hamburguesas, hidratantes, maltadas, malteadasDeNieve;
     static List<String> malteadasExoticas, masBebidas, paraEmpezar, paraRefrescar;
@@ -41,9 +46,11 @@ public class MainActivity extends AppCompatActivity
     ViewPager viewPager;
     ProgressDialog dialog;
     ConexionWeb conexion, conexion1;
+    ConexionWebImagen conexion2;
     ArrayAdapter<String> arrayAdapter;
     NavigationView navigationView;
     Menu menu;
+    static Bitmap imagenes[];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +66,9 @@ public class MainActivity extends AppCompatActivity
 
         menu= navigationView.getMenu();
 
-        flag1= false;
+        flag= flag1= false;
+
+        cont= 0;
 
         conexion= new ConexionWeb(this);
         conexion1= new ConexionWeb(this);
@@ -270,14 +279,38 @@ public class MainActivity extends AppCompatActivity
                 idsProductos.add(list);
                 idsProductos1.add(list1);
             }
+            imagenes= new Bitmap[idsProductos.size()+18];
+
             try {
                 URL url= new URL("https://thecaveoflittlereik.000webhostapp.com/Pepe_Yus_App/Phps/obtenerProds.php");
-                dialog = ProgressDialog.show(this, "Atención", "Conectando con el servidor");
+                dialog = ProgressDialog.show(this, "Atención", "Connecting to server");
                 conexion.execute(url);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
+            for(int i= 0;i<tipos.length;i++){
+                //System.out.println("request"+", "+idsProductos.size());
+                String nombre= tipos[i];
+                nombre= nombre.toLowerCase();
+                nombre= nombre.replace(' ', '_');
+                conexion2= new ConexionWebImagen(MainActivity.this);
+                //System.out.println("https://thecaveoflittlereik.000webhostapp.com/Pepe_Yus_App/Contenido/"+nombre+".jpg");
+                try {
+                    URL url= new URL("https://thecaveoflittlereik.000webhostapp.com/Pepe_Yus_App/Contenido/"+nombre+".jpg");
+                    //dialog = ProgressDialog.show(this, "Atención", "Conectando con el servidor");
+                    conexion2.execute(url);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+            }
             flag1= true;
+            System.out.println(flag1);
         }
+    }
+
+    public void procesarImagen(Bitmap image){
+        //dialog.dismiss();
+        imagenes[cont]= image;
+        cont++;
     }
 }
